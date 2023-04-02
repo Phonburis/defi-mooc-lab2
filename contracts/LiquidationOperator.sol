@@ -136,19 +136,18 @@ contract LiquidationOperator is IUniswapV2Callee {
     uint8 public constant health_factor_decimals = 18;
 
     // TODO: define constants used in the contract including ERC-20 tokens, Uniswap Pairs, Aave lending pools, etc. */
-    
-    IERC20 constant WBTC = IERC20(0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599);
-    IWETH constant WETH = IWETH(0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2);
-    IERC20 constant USDT = IERC20(0xdAC17F958D2ee523a2206206994597C13D831ec7);
+    IERC20 constant WBTC = IERC20(0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599); // Type of WBTC
+    IWETH constant WETH = IWETH(0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2); // Type of WETH
+    IERC20 constant USDT = IERC20(0xdAC17F958D2ee523a2206206994597C13D831ec7); // Type of USDT
 
-    IUniswapV2Factory constant uniswapV2Factory = IUniswapV2Factory(0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f);
+    IUniswapV2Factory constant uniswapV2Factory = IUniswapV2Factory(0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f); // Type of IUniswapV2Factory
     IUniswapV2Pair immutable uniswapV2Pair_WETH_USDT; // Pool1
     IUniswapV2Pair immutable uniswapV2Pair_WBTC_WETH; // Pool2
 
     ILendingPool constant lendingPool = ILendingPool(0x7d2768dE32b0b80b7a3454c06BdAc94A69DDc7A9);
 
-    address constant liquidationTarget = 0x59CE4a2AC5bC3f5F225439B2993b86B42f6d3e9F;
-    uint debt_USDT;
+    address constant liquidationTarget = 0x59CE4a2AC5bC3f5F225439B2993b86B42f6d3e9F; // Account ที่ต้องการ liquidation
+    uint debt_USDT; // กู้หนี้ออกมาเป็น USDT เเล้วจะจ่ายคืนออกมาเป็น WBTC 
 
     // END TODO
 
@@ -195,14 +194,15 @@ contract LiquidationOperator is IUniswapV2Callee {
 
         uniswapV2Pair_WETH_USDT = IUniswapV2Pair(uniswapV2Factory.getPair(address(WETH), address(USDT))); // Pool1
         uniswapV2Pair_WBTC_WETH = IUniswapV2Pair(uniswapV2Factory.getPair(address(WBTC), address(WETH))); // Pool2
-        debt_USDT = 2916378221684;
-        
+        // debt_USDT = 2916378221684; // ระบุ จุดทศนิยมตำเเหน่งที่ 6 จะได้ 2916378.221684
+        debt_USDT = 10000000000;
+
         // END TODO
     }
 
     // TODO: add a `receive` function so that you can withdraw your WETH
 
-    receive() external payable {}
+    receive() external payable {} // รับ ETH ที่เป็นทรัพย์สินด้วย payable
 
     // END TODO
 
@@ -214,7 +214,7 @@ contract LiquidationOperator is IUniswapV2Callee {
         //    *** Your code here ***
 
         // 1. get the target user account data & make sure it is liquidatable
-        
+
         uint256 totalCollateralETH;
         uint256 totalDebtETH;
         uint256 availableBorrowsETH;
@@ -238,7 +238,7 @@ contract LiquidationOperator is IUniswapV2Callee {
         // we should borrow USDT, liquidate the target user and get the WBTC, then swap WBTC to repay uniswap
         // (please feel free to develop other workflows as long as they liquidate the target user successfully)
 
-        uniswapV2Pair_WETH_USDT.swap(0, debt_USDT, address(this), "$");
+        uniswapV2Pair_WETH_USDT.swap(0, debt_USDT, address(this), "$"); // liquidation account
 
         // 3. Convert the profit into ETH and send back to sender
 
